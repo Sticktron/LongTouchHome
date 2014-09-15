@@ -187,7 +187,7 @@ static NSString *kLongTouchHome_eventName = @"LongTouchHomeEvent";
 	return @"Long touch on Home";
 }
 - (NSString *)localizedGroupForEventName:(NSString *)eventName {
-	return @"Fingerprint Stuff";
+	return @"Fingerprint Sensor";
 }
 - (NSString *)localizedDescriptionForEventName:(NSString *)eventName {
 	return @"Long touch on the fingerprint sensor.";
