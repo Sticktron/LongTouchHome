@@ -27,15 +27,8 @@ static NSString *kLongTouchHome_eventName = @"LongTouchHomeEvent";
 
 
 // Interfaces
+
 @protocol BiometricKitDelegate <NSObject>
-@optional
-- (void)homeButtonPressed;
-- (void)enrollProgress:(id)arg1;
-- (void)statusMessage:(unsigned int)arg1;
-- (void)matchResult:(id)arg1 withDetails:(id)arg2;
-- (void)matchResult:(id)arg1;
-- (void)enrollResult:(id)arg1;
-@end
 
 @interface BiometricKit : NSObject <BiometricKitDelegate>
 + (id)manager;
@@ -83,9 +76,6 @@ static NSString *kLongTouchHome_eventName = @"LongTouchHomeEvent";
 }
 - (NSString *)localizedDescriptionForEventName:(NSString *)eventName {
 	return @"Long touch on the fingerprint sensor.";
-}
-- (void)biometricEventMonitor:(SBUIBiometricEventMonitor *)arg1 handleBiometricEvent:(unsigned long long)arg2 {
-	DebugLog(@"*** biometric event: %llu", arg2);
 }
 - (void)dealloc {
 	[LASharedActivator unregisterEventDataSourceWithEventName:kLongTouchHome_eventName];
