@@ -10,15 +10,8 @@
 #include <dispatch/dispatch.h>
 #include <objc/runtime.h>
 
-
 #define DEBUG_PREFIX @"{ LongTouchHome }"
 #import "DebugLog.h"
-
-
-#define LASendEventWithName(eventName) \
-	[LASharedActivator sendEventToListener:[LAEvent eventWithName:eventName mode:[LASharedActivator currentEventMode]]]
-
-static NSString *kLongTouchHome_eventName = @"LongTouchHomeEvent";
 
 #define TouchIDFingerUp    0
 #define TouchIDFingerDown  1
@@ -26,8 +19,14 @@ static NSString *kLongTouchHome_eventName = @"LongTouchHomeEvent";
 #define TouchIDMatched     3
 #define TouchIDNotMatched  9
 
+#define LASendEventWithName(eventName) \
+	[LASharedActivator sendEventToListener:[LAEvent eventWithName:eventName mode:[LASharedActivator currentEventMode]]]
+
+static NSString *kLongTouchHome_eventName = @"LongTouchHomeEvent";
 
 
+
+// Interfaces
 @protocol BiometricKitDelegate <NSObject>
 @optional
 - (void)homeButtonPressed;
@@ -49,117 +48,11 @@ static NSString *kLongTouchHome_eventName = @"LongTouchHomeEvent";
 
 
 
-/*
-//@interface LTHTouchIDController : NSObject <BiometricKitDelegate> {
-//	BOOL _wasMatching;
-//	id _monitorDelegate;
-//	NSArray *_monitorObservers;
-//	BOOL isMonitoringEvents;
-//}
-//@end
-//
-//@implementation LTHTouchIDController
-//
-//- (void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned long long)event {
-//	DebugLog(@"event: %llu", event);
-//	
-//	switch (event) {
-//		case TouchIDFingerDown:
-//			DebugLog(@">>> finger touchdown!");
-//			break;
-//		case TouchIDFingerUp:
-//			DebugLog(@">>> finger removed!");
-//			break;
-//		case TouchIDFingerHeld:
-//			DebugLog(@">>> finger held");
-//			break;
-//	}
-//}
-//
-//- (void)startMonitoringEvents {
-//	if (isMonitoringEvents) {
-//		return;
-//	}
-//	
-//	isMonitoringEvents = YES;
-//	
-//	_monitorDelegate = [[%c(BiometricKit) manager] delegate];
-//	
-//	SBUIBiometricEventMonitor *bioMonitor = [%c(SBUIBiometricEventMonitor) sharedInstance];
-//	
-//	[[%c(BiometricKit) manager] setDelegate:bioMonitor];
-//	
-//	_wasMatching = [[bioMonitor valueForKey:@"_matchingEnabled"] boolValue];
-//	_monitorObservers = [[bioMonitor valueForKey:@"observers"] copy];
-//	
-//	for (int i=0; i < _monitorObservers.count; i++) {
-//		[bioMonitor removeObserver:[[bioMonitor valueForKey:@"observers"] objectAtIndex:i]];
-//	}
-//	
-//	[bioMonitor addObserver:self];
-//	[bioMonitor _setMatchingEnabled:YES];
-//	[bioMonitor _startMatching];
-//}
-//
-//- (void)stoptMonitoringEvents {
-//    if (!isMonitoringEvents) {
-//		return;
-//	}
-//	
-////	id manager = [objc_getClass("BiometricKit") manager];
-////	DebugLog(@"manager=%@", manager);
-////	
-////	id monitor = [manager delegate];
-////	DebugLog(@"monitor=%@", monitor);
-////	
-////	[monitor removeObserver:self];
-////	
-////	for (id observer in _monitorObservers) {
-////		 [monitor addObserver:observer];
-////	}
-////	[monitor _setMatchingEnabled:_wasMatching];
-////
-////	[[objc_getClass("BiometricKit") manager] removeObserver:self];
-////	
-//	isMonitoringEvents=NO;
-//}
-//
-//@end
-//
-*/
-
-
-
-
-
-////////////////////////////////////////////////////////////////
-// Event Handler
-
-//static void HandleEvent(CFNotificationCenterRef center,
-//						void *observer,
-//						CFStringRef name,
-//						const void *object,
-//						CFDictionaryRef userInfo) {
-//	
-//	DebugLogC(@"*** HandleEvent named: %@ with stuff: %@ ***", (NSString *)name, userInfo);
-//	
-//	LASendEventWithName(kLongTouchHome_eventName);
-//	DebugLogC(@"*** LASent: %@ ***", kLongTouchHome_eventName);
-//	
-//}
-
-
-
-
-
-////////////////////////////////////////////////////////////////
-// Event Class
+// My Activator Event Class
 
 @interface LongTouchOnHomeDataSource : NSObject <LAEventDataSource> {}
 + (id)sharedInstance;
 @end
-
-//static LongTouchOnHomeDataSource *me;
 
 @implementation LongTouchOnHomeDataSource
 + (id)sharedInstance {
@@ -182,7 +75,6 @@ static NSString *kLongTouchHome_eventName = @"LongTouchHomeEvent";
 	}
 	return self;
 }
-
 - (NSString *)localizedTitleForEventName:(NSString *)eventName {
 	return @"Long touch on Home";
 }
@@ -192,65 +84,37 @@ static NSString *kLongTouchHome_eventName = @"LongTouchHomeEvent";
 - (NSString *)localizedDescriptionForEventName:(NSString *)eventName {
 	return @"Long touch on the fingerprint sensor.";
 }
-
 - (void)biometricEventMonitor:(SBUIBiometricEventMonitor *)arg1 handleBiometricEvent:(unsigned long long)arg2 {
 	DebugLog(@"*** biometric event: %llu", arg2);
 }
-
 - (void)dealloc {
 	[LASharedActivator unregisterEventDataSourceWithEventName:kLongTouchHome_eventName];
 	[super dealloc];
 }
-
 @end
 
 
 
-////////////////////////////////////////////////////////////////
-// Event Dispatch
-
+// Event Dispatcher
 %hook SBLockScreenManager
-
 - (void)biometricEventMonitor:(SBUIBiometricEventMonitor *)arg1 handleBiometricEvent:(unsigned long long)event {
-	DebugLog(@"*** biometric event: %llu", event);
+	DebugLog(@"biometric event: %llu", event);
 	
-	switch (event) {
-		case TouchIDFingerHeld:
-			DebugLog(@">>> finger held");
-			
-			LASendEventWithName(kLongTouchHome_eventName);
-			
-			DebugLog(@">>> event sent");
-			break;
+	if (event == TouchIDFingerHeld) {
+		LASendEventWithName(kLongTouchHome_eventName);
+		DebugLog(@">>> event sent to Activator...");
 	}
-	
 	%orig;
 }
-
 %end
 
 
 
-
-
-////////////////////////////////////////////////////////////////
 // Init
-
 %ctor {
 	@autoreleasepool {
 		NSLog(@"    LongTouchHome LAEvent init.   ");
-		
-//		LTHTouchIDController *controller = [[LTHTouchIDController alloc] init];
-//		[controller startMonitoringEvents];
-		
 		%init;
-		
-//		CFNotificationCenterRef center = CFNotificationCenterGetDarwinNotifyCenter();
-//		CFNotificationCenterAddObserver(center,
-//										NULL,
-//										HandleEvent,
-//										(CFStringRef)kLongTouchHome_eventName,
-//										NULL,
-//										CFNotificationSuspensionBehaviorCoalesce);
 	};
 }
+
