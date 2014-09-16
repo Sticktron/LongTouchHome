@@ -2,10 +2,10 @@
 //  DebugLog.h
 //  NSLog-ing my way.
 //
-//  DebugLog()			print Class, Selector, Comment				(ObjC only)
-//  DebugLog0			print Class, Selector						(ObjC only)
-//  DebugLogMore()		print Filename, Line, Signature, Comment	(ObjC only)
-//  DebugLogC(s, ...)	print Comment								(C, ObjC)
+//  DebugLog()		print Class, Selector, Comment			(ObjC only)
+//  DebugLog0		print Class, Selector				(ObjC only)
+//  DebugLogMore()	print Filename, Line, Signature, Comment	(ObjC only)
+//  DebugLogC(s, ...)	print Comment					(C, ObjC)
 //
 //  Sticktron 2014
 //
