@@ -103,7 +103,7 @@ static NSString *kLongTouchHome_eventName = @"LongTouchHomeEvent";
 // Init
 %ctor {
 	@autoreleasepool {
-		NSLog(@"    LongTouchHome LAEvent init.   ");
+		NSLog(@" LongTouchHome LAEvent init.");
 		%init;
 	};
 }
