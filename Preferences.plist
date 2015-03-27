@@ -7,7 +7,7 @@
 		<key>cell</key>
 		<string>PSLinkCell</string>
 		<key>icon</key>
-		<string>/Applications/Preferences.app/icon-table@2x.png</string>
+		<string>/Applications/Preferences.app/Small-Icon-modern.png</string>
 		<key>label</key>
 		<string>LongTouchHome</string>
 	</dict>
